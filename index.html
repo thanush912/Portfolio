@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -348,6 +347,74 @@
     transform:translateY(-2px) scale(1.04);
   }
 
+  /* ---- BLOG ---- */
+  .blog-list{display:flex;flex-direction:column;gap:14px;margin-bottom:28px;}
+  .blog-post{
+    border:1px solid var(--line);border-radius:10px;
+    background:var(--ink-2);overflow:hidden;
+  }
+  .blog-post-head{
+    display:flex;align-items:center;justify-content:space-between;
+    gap:16px;padding:20px 22px;cursor:pointer;
+  }
+  .blog-post-titles{flex:1;min-width:0;}
+  .blog-post-date{
+    font-family:var(--mono);font-size:0.7rem;color:var(--teal);
+    text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;
+  }
+  .blog-post-title{
+    font-family:var(--serif);font-size:1.25rem;font-weight:600;
+  }
+  .blog-post-chevron{
+    font-family:var(--mono);font-size:0.9rem;color:var(--paper-dim);
+    flex-shrink:0;transition:transform 0.25s;
+  }
+  .blog-post.open .blog-post-chevron{transform:rotate(180deg);}
+  .blog-post-body{
+    max-height:0;overflow:hidden;transition:max-height 0.35s ease;
+  }
+  .blog-post.open .blog-post-body{max-height:600px;}
+  .blog-post-content{
+    padding:0 22px 22px;font-size:0.92rem;color:var(--paper-dim);
+    line-height:1.7;white-space:pre-wrap;
+  }
+  .blog-post-actions{
+    display:flex;gap:10px;padding:0 22px 20px;
+  }
+  .blog-post-actions button{
+    font-family:var(--mono);font-size:0.68rem;text-transform:uppercase;
+    letter-spacing:0.05em;background:transparent;border:1px solid var(--line);
+    color:var(--paper-dim);padding:6px 12px;border-radius:20px;cursor:pointer;
+    transition:all 0.2s;
+  }
+  .blog-post-actions button:hover{border-color:var(--amber);color:var(--amber);}
+  .blog-post-actions .blog-delete-btn:hover{border-color:var(--pink);color:var(--pink);}
+  .blog-post-edit-fields{padding:0 22px 22px;display:none;}
+  .blog-post.editing .blog-post-edit-fields{display:block;}
+  .blog-post.editing .blog-post-content{display:none;}
+  .blog-post-edit-fields input, .blog-post-edit-fields textarea{
+    width:100%;background:var(--ink);border:1px solid var(--line);
+    color:var(--paper);font-family:var(--sans);font-size:0.9rem;
+    padding:10px 12px;border-radius:6px;margin-bottom:10px;
+  }
+  .blog-post-edit-fields textarea{min-height:140px;resize:vertical;line-height:1.6;}
+  .blog-post-edit-fields input:focus, .blog-post-edit-fields textarea:focus{
+    outline:none;border-color:var(--amber);
+  }
+  .blog-empty{
+    font-family:var(--mono);font-size:0.85rem;color:var(--paper-dim);
+    border:1px dashed var(--line);border-radius:10px;padding:28px;text-align:center;
+  }
+  .blog-add-btn{
+    display:flex;align-items:center;gap:10px;
+    font-family:var(--mono);font-size:0.85rem;color:var(--paper);
+    background:transparent;border:1px dashed var(--line);
+    padding:14px 20px;border-radius:10px;cursor:pointer;
+    transition:all 0.2s;width:100%;justify-content:center;
+  }
+  .blog-add-btn:hover{border-color:var(--lime);color:var(--lime);border-style:solid;}
+  .blog-add-icon{font-size:1.1rem;line-height:1;}
+
   /* ---- CONTACT ---- */
   #contact{border-bottom:none;padding-bottom:100px;}
   .contact-title{
@@ -407,6 +474,7 @@
         <li><a href="#experience"><span class="dash"></span>Experience</a></li>
         <li><a href="#projects"><span class="dash"></span>Projects</a></li>
         <li><a href="#skills"><span class="dash"></span>Stack</a></li>
+        <li><a href="#blog"><span class="dash"></span>Blog</a></li>
         <li><a href="#contact"><span class="dash"></span>Contact</a></li>
       </ul>
     </div>
@@ -568,8 +636,17 @@
       </div>
     </section>
 
+    <section id="blog">
+      <div class="eyebrow">05 — Blog</div>
+      <p style="color:var(--paper-dim);max-width:60ch;margin-bottom:32px;">Notes on what I'm learning, building, or figuring out. Click a post to expand it.</p>
+      <div class="blog-list" id="blogList"></div>
+      <button class="blog-add-btn" id="blogAddBtn">
+        <span class="blog-add-icon">+</span> New post
+      </button>
+    </section>
+
     <section id="contact">
-      <div class="eyebrow">05 — Contact</div>
+      <div class="eyebrow">06 — Contact</div>
       <div class="contact-title" contenteditable="true" data-key="contactTitle">GET /contact → let's talk.</div>
       <div class="contact-links">
         <a class="contact-link" href="mailto:thanushsr912@gmail.com"><span>Email</span><span><span contenteditable="true" data-key="contactEmail">thanushsr912@gmail.com</span> <span class="arrow">↗</span></span></a>
@@ -748,6 +825,117 @@
       location.reload();
     }
   });
+
+  // ---- BLOG: add / edit / expand / delete, persisted separately ----
+  const BLOG_KEY = 'portfolio-blog-v1';
+  let blogPosts = [];
+
+  function loadBlog(){
+    try{
+      const raw = localStorage.getItem(BLOG_KEY);
+      blogPosts = raw ? JSON.parse(raw) : [];
+    }catch(e){ blogPosts = []; }
+  }
+  function saveBlog(){
+    try{ localStorage.setItem(BLOG_KEY, JSON.stringify(blogPosts)); showToast(); }
+    catch(e){ console.warn('Could not save blog', e); }
+  }
+  function fmtBlogDate(iso){
+    if(!iso) return '';
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+  }
+  function escapeHtml(s){
+    return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function renderBlog(){
+    const list = document.getElementById('blogList');
+    if(blogPosts.length === 0){
+      list.innerHTML = '<div class="blog-empty">No posts yet — click "New post" to write your first one.</div>';
+      return;
+    }
+    list.innerHTML = blogPosts.map(p => `
+      <div class="blog-post ${p.open ? 'open' : ''} ${p.editing ? 'editing' : ''}" data-id="${p.id}">
+        <div class="blog-post-head" data-toggle="${p.id}">
+          <div class="blog-post-titles">
+            <div class="blog-post-date">${fmtBlogDate(p.date)}</div>
+            <div class="blog-post-title">${escapeHtml(p.title) || 'Untitled post'}</div>
+          </div>
+          <div class="blog-post-chevron">▾</div>
+        </div>
+        <div class="blog-post-body">
+          <div class="blog-post-content">${escapeHtml(p.content) || 'No content yet.'}</div>
+          <div class="blog-post-edit-fields">
+            <input type="text" data-edit-title="${p.id}" placeholder="Post title" value="${escapeHtml(p.title)}">
+            <textarea data-edit-content="${p.id}" placeholder="Write your post...">${escapeHtml(p.content)}</textarea>
+          </div>
+          <div class="blog-post-actions">
+            <button data-edit-toggle="${p.id}">${p.editing ? 'Save' : 'Edit'}</button>
+            <button class="blog-delete-btn" data-delete="${p.id}">Delete</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+    list.querySelectorAll('[data-toggle]').forEach(el=>{
+      el.addEventListener('click', ()=>{
+        const id = el.dataset.toggle;
+        const post = blogPosts.find(p=>String(p.id)===id);
+        post.open = !post.open;
+        renderBlog();
+      });
+    });
+    list.querySelectorAll('[data-edit-toggle]').forEach(btn=>{
+      btn.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        const id = btn.dataset.editToggle;
+        const post = blogPosts.find(p=>String(p.id)===id);
+        if(post.editing){
+          const titleEl = list.querySelector(`[data-edit-title="${id}"]`);
+          const contentEl = list.querySelector(`[data-edit-content="${id}"]`);
+          post.title = titleEl.value.trim();
+          post.content = contentEl.value;
+          post.editing = false;
+          saveBlog();
+        } else {
+          post.editing = true;
+          post.open = true;
+        }
+        renderBlog();
+      });
+    });
+    list.querySelectorAll('[data-delete]').forEach(btn=>{
+      btn.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        const id = btn.dataset.delete;
+        if(confirm('Delete this post?')){
+          blogPosts = blogPosts.filter(p=>String(p.id)!==id);
+          saveBlog();
+          renderBlog();
+        }
+      });
+    });
+  }
+
+  document.getElementById('blogAddBtn').addEventListener('click', ()=>{
+    const post = {
+      id: Date.now(),
+      title: '',
+      content: '',
+      date: new Date().toISOString().slice(0,10),
+      open: true,
+      editing: true
+    };
+    blogPosts.unshift(post);
+    renderBlog();
+    saveBlog();
+    const el = document.querySelector(`[data-edit-title="${post.id}"]`);
+    if(el) el.focus();
+  });
+
+  loadBlog();
+  renderBlog();
 </script>
 
 </body>
