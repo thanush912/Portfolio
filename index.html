@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thanush S R — Data Analyst</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1c1233;
+    --ink-2:#28193f;
+    --paper:#fbf6ee;
+    --paper-dim:#c9bcdb;
+    --amber:#ff6b4a;
+    --teal:#12b8a6;
+    --violet:#8b5cf6;
+    --cyan:#37c9e8;
+    --lime:#c9f142;
+    --pink:#ff5da2;
+    --line: rgba(251,246,238,0.14);
+    --serif: 'Fraunces', serif;
+    --sans: 'Inter', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:
+      radial-gradient(900px circle at 8% 0%, rgba(139,92,246,0.35), transparent 55%),
+      radial-gradient(700px circle at 95% 15%, rgba(255,107,74,0.25), transparent 50%),
+      radial-gradient(800px circle at 30% 90%, rgba(18,184,166,0.22), transparent 55%),
+      var(--ink);
+    color:var(--paper);
+    font-family:var(--sans);
+    line-height:1.5;
+    overflow-x:hidden;
+  }
+  ::selection{background:var(--amber);color:var(--ink);}
+
+  a{color:inherit;text-decoration:none;}
+
+  /* grain texture */
+  body::before{
+    content:"";
+    position:fixed;inset:0;
+    pointer-events:none;
+    z-index:200;
+    opacity:0.035;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* cursor spotlight */
+  #spotlight{
+    position:fixed;inset:0;pointer-events:none;z-index:1;
+    background: radial-gradient(600px circle at var(--x,50%) var(--y,50%), rgba(232,163,61,0.06), transparent 40%);
+    transition: background 0.05s;
+  }
+
+  .wrap{
+    display:grid;
+    grid-template-columns:240px 1fr;
+    min-height:100vh;
+  }
+
+  /* ---- SIDEBAR / INDEX ---- */
+  nav.index{
+    position:sticky;top:0;height:100vh;
+    border-right:1px solid var(--line);
+    padding:48px 28px;
+    display:flex;flex-direction:column;
+    justify-content:space-between;
+    z-index:10;
+  }
+  .index-top .mark{
+    font-family:var(--serif);
+    font-size:1.5rem;font-weight:600;
+    letter-spacing:-0.02em;
+    background:linear-gradient(100deg, var(--amber), var(--pink) 45%, var(--violet) 80%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    display:inline-block;
+  }
+  .index-top .mark span{color:var(--lime);-webkit-text-fill-color:var(--lime);}
+  .index-role{
+    font-family:var(--mono);font-size:0.7rem;
+    color:var(--paper-dim);text-transform:uppercase;
+    letter-spacing:0.08em;margin-top:6px;
+  }
+  ul.tabs{list-style:none;margin-top:64px;}
+  ul.tabs li{margin-bottom:18px;}
+  ul.tabs a{
+    font-family:var(--mono);font-size:0.8rem;
+    color:var(--paper-dim);
+    display:flex;align-items:center;gap:10px;
+    transition:color 0.25s;
+    padding:4px 0;
+  }
+  ul.tabs a .dash{
+    width:14px;height:1px;background:var(--paper-dim);
+    transition:all 0.25s;
+  }
+  ul.tabs a:hover, ul.tabs a.active{color:var(--paper);}
+  ul.tabs a.active .dash{width:26px;background:var(--amber);}
+  ul.tabs a:hover .dash{background:var(--amber);}
+
+  .edit-btn{
+    display:flex;align-items:center;gap:8px;
+    font-family:var(--mono);font-size:0.72rem;color:var(--paper-dim);
+    background:transparent;border:1px solid var(--line);
+    padding:9px 14px;border-radius:20px;margin-bottom:20px;
+    cursor:pointer;transition:all 0.2s;width:100%;
+  }
+  .edit-btn:hover{border-color:var(--amber);color:var(--paper);}
+  .edit-btn .edit-dot{width:6px;height:6px;border-radius:50%;background:var(--paper-dim);transition:all 0.2s;}
+  body.edit-mode .edit-btn{border-color:var(--lime);color:var(--lime);}
+  body.edit-mode .edit-btn .edit-dot{background:var(--lime);box-shadow:0 0 8px var(--lime);}
+
+  [contenteditable="true"]{
+    outline:none;
+    border-radius:4px;
+    transition:background 0.15s;
+  }
+  body.edit-mode [contenteditable="true"]{
+    background:rgba(201,241,66,0.08);
+    box-shadow:0 0 0 1px rgba(201,241,66,0.25);
+    padding:2px 6px;margin:-2px -6px;
+    cursor:text;
+  }
+  body.edit-mode [contenteditable="true"]:hover{
+    background:rgba(201,241,66,0.16);
+  }
+  body.edit-mode [contenteditable="true"]:focus{
+    background:rgba(201,241,66,0.2);
+    box-shadow:0 0 0 1.5px var(--lime);
+  }
+
+  .save-toast{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120%);
+    background:var(--lime);color:var(--ink);
+    font-family:var(--mono);font-size:0.75rem;
+    padding:10px 20px;border-radius:30px;
+    z-index:300;transition:transform 0.35s cubic-bezier(.4,.2,.2,1);
+  }
+  .save-toast.show{transform:translateX(-50%) translateY(0);}
+
+  .index-bottom{font-family:var(--mono);font-size:0.7rem;color:var(--paper-dim);}
+  .index-bottom .status{
+    display:flex;align-items:center;gap:8px;margin-bottom:14px;
+  }
+  .index-bottom .dot{
+    width:7px;height:7px;border-radius:50%;background:#7fdc9c;
+    box-shadow:0 0 8px #7fdc9c;
+    animation:pulse 2s infinite;
+  }
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.35;}}
+  .index-bottom a{border-bottom:1px solid var(--line);padding-bottom:1px;}
+  .index-bottom a:hover{border-color:var(--amber);color:var(--amber);}
+
+  main{position:relative;z-index:2;}
+  section{
+    padding:120px 72px;
+    border-bottom:1px solid var(--line);
+    max-width:1100px;
+  }
+  .eyebrow{
+    font-family:var(--mono);font-size:0.72rem;
+    color:var(--amber);text-transform:uppercase;letter-spacing:0.12em;
+    display:flex;align-items:center;gap:10px;margin-bottom:24px;
+  }
+  .eyebrow::before{content:"";width:26px;height:1px;background:var(--amber);}
+  #about .eyebrow{color:var(--cyan);}
+  #about .eyebrow::before{background:var(--cyan);}
+  #experience .eyebrow{color:var(--lime);}
+  #experience .eyebrow::before{background:var(--lime);}
+  #projects .eyebrow{color:var(--pink);}
+  #projects .eyebrow::before{background:var(--pink);}
+  #skills .eyebrow{color:var(--violet);}
+  #skills .eyebrow::before{background:var(--violet);}
+  #contact .eyebrow{color:var(--teal);}
+  #contact .eyebrow::before{background:var(--teal);}
+
+  /* ---- HERO ---- */
+  #hero{
+    min-height:100vh;
+    display:flex;flex-direction:column;justify-content:center;
+    padding-top:64px;padding-bottom:64px;
+    border-bottom:1px solid var(--line);
+  }
+  h1.hero-title{
+    font-family:var(--serif);
+    font-weight:600;
+    font-size:clamp(2.6rem, 6vw, 5.2rem);
+    line-height:1.02;letter-spacing:-0.02em;
+    max-width:14ch;
+  }
+  h1.hero-title em{
+    font-style:italic;font-weight:300;
+    background:linear-gradient(100deg, var(--cyan), var(--lime));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .hero-sub{
+    margin-top:32px;font-size:1.15rem;color:var(--paper-dim);
+    max-width:46ch;
+  }
+  .type-line{
+    font-family:var(--mono);font-size:0.95rem;color:var(--teal);
+    margin-top:28px;min-height:1.4em;
+  }
+  .type-line .cursor{display:inline-block;width:8px;background:var(--amber);margin-left:2px;animation:blink 1s steps(1) infinite;}
+  @keyframes blink{50%{opacity:0;}}
+  .hero-meta{
+    display:flex;gap:48px;margin-top:64px;flex-wrap:wrap;
+  }
+  .hero-meta div{font-family:var(--mono);font-size:0.75rem;color:var(--paper-dim);}
+  .hero-meta strong{display:block;font-family:var(--sans);font-size:1rem;color:var(--paper);font-weight:600;margin-bottom:4px;}
+
+  /* ---- ABOUT ---- */
+  .about-grid{display:grid;grid-template-columns:1fr 1fr;gap:64px;margin-top:36px;}
+  .about-grid p{font-size:1.05rem;color:var(--paper-dim);margin-bottom:18px;}
+  .about-grid p strong{color:var(--paper);font-weight:500;}
+  .fact-list{list-style:none;}
+  .fact-list li{
+    display:flex;justify-content:space-between;
+    padding:14px 0;border-bottom:1px solid var(--line);
+    font-size:0.9rem;
+  }
+  .fact-list li span:first-child{color:var(--paper-dim);font-family:var(--mono);font-size:0.75rem;text-transform:uppercase;letter-spacing:0.06em;}
+
+  /* ---- TIMELINE (draggable) ---- */
+  .timeline-track{
+    display:flex;gap:0;margin-top:48px;
+    overflow-x:auto;cursor:grab;
+    scroll-snap-type:x proximity;
+    padding-bottom:24px;
+    -webkit-overflow-scrolling:touch;
+  }
+  .timeline-track.dragging{cursor:grabbing;}
+  .timeline-track::-webkit-scrollbar{height:4px;}
+  .timeline-track::-webkit-scrollbar-thumb{background:var(--line);}
+  .tl-item{
+    min-width:300px;scroll-snap-align:start;
+    border-left:1px solid var(--line);
+    padding:0 36px 0 24px;position:relative;
+  }
+  .tl-item:first-child{border-left:none;padding-left:0;}
+  .tl-item::before{
+    content:"";position:absolute;top:6px;left:-4.5px;
+    width:8px;height:8px;border-radius:50%;background:var(--amber);
+    box-shadow:0 0 10px currentColor;
+  }
+  .tl-item:first-child::before{left:-4px;}
+  .tl-item:nth-child(1)::before{background:var(--pink);color:var(--pink);}
+  .tl-item:nth-child(2)::before{background:var(--cyan);color:var(--cyan);}
+  .tl-item:nth-child(3)::before{background:var(--lime);color:var(--lime);}
+  .tl-item:nth-child(4)::before{background:var(--violet);color:var(--violet);}
+  .tl-item:nth-child(5)::before{background:var(--amber);color:var(--amber);}
+  .tl-item:nth-child(6)::before{background:var(--teal);color:var(--teal);}
+  .tl-item:nth-child(1) .tl-date{color:var(--pink);}
+  .tl-item:nth-child(2) .tl-date{color:var(--cyan);}
+  .tl-item:nth-child(3) .tl-date{color:var(--lime);}
+  .tl-item:nth-child(4) .tl-date{color:var(--violet);}
+  .tl-item:nth-child(5) .tl-date{color:var(--amber);}
+  .tl-item:nth-child(6) .tl-date{color:var(--teal);}
+  .tl-date{font-family:var(--mono);font-size:0.72rem;color:var(--amber);letter-spacing:0.06em;}
+  .tl-role{font-family:var(--serif);font-size:1.3rem;margin:10px 0 6px;font-weight:500;}
+  .tl-co{font-size:0.85rem;color:var(--paper-dim);margin-bottom:14px;}
+  .tl-desc{font-size:0.9rem;color:var(--paper-dim);line-height:1.6;}
+  .drag-hint{
+    font-family:var(--mono);font-size:0.7rem;color:var(--paper-dim);
+    margin-top:12px;display:flex;align-items:center;gap:8px;
+  }
+  .drag-hint svg{opacity:0.6;}
+
+  /* ---- PROJECTS (flip cards) ---- */
+  .proj-grid{
+    display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:44px;
+  }
+  .proj-card{
+    perspective:1600px;height:280px;
+  }
+  .proj-inner{
+    position:relative;width:100%;height:100%;
+    transform-style:preserve-3d;
+    transition:transform 0.6s cubic-bezier(.4,.2,.2,1);
+  }
+  .proj-card.flipped .proj-inner{transform:rotateY(180deg);}
+  .proj-face{
+    position:absolute;inset:0;backface-visibility:hidden;
+    border:1px solid var(--line);padding:32px;
+    display:flex;flex-direction:column;justify-content:space-between;
+  }
+  .proj-front{background:var(--ink-2);border-top:3px solid var(--amber);}
+  .proj-card:nth-child(1) .proj-front{border-top-color:var(--pink);}
+  .proj-card:nth-child(2) .proj-front{border-top-color:var(--cyan);}
+  .proj-card:nth-child(3) .proj-front{border-top-color:var(--lime);}
+  .proj-card:nth-child(4) .proj-front{border-top-color:var(--violet);}
+  .proj-back{
+    background:linear-gradient(135deg, var(--violet), var(--pink));
+    color:var(--paper);
+    transform:rotateY(180deg);
+  }
+  .proj-card:nth-child(1) .proj-back{background:linear-gradient(135deg, var(--pink), var(--amber));}
+  .proj-card:nth-child(2) .proj-back{background:linear-gradient(135deg, var(--cyan), var(--violet));}
+  .proj-card:nth-child(3) .proj-back{background:linear-gradient(135deg, var(--lime), var(--teal));}
+  .proj-card:nth-child(4) .proj-back{background:linear-gradient(135deg, var(--violet), var(--pink));}
+  .proj-tag{font-family:var(--mono);font-size:0.68rem;color:var(--amber);text-transform:uppercase;letter-spacing:0.08em;}
+  .proj-card:nth-child(1) .proj-front .proj-tag{color:var(--pink);}
+  .proj-card:nth-child(2) .proj-front .proj-tag{color:var(--cyan);}
+  .proj-card:nth-child(3) .proj-front .proj-tag{color:var(--lime);}
+  .proj-card:nth-child(4) .proj-front .proj-tag{color:var(--violet);}
+  .proj-title{font-family:var(--serif);font-size:1.6rem;font-weight:600;margin-top:12px;}
+  .proj-flip-btn{
+    align-self:flex-start;font-family:var(--mono);font-size:0.72rem;
+    border:1px solid var(--line);padding:8px 14px;
+    display:flex;align-items:center;gap:8px;
+    transition:all 0.2s;
+  }
+  .proj-card:hover .proj-flip-btn{border-color:var(--amber);color:var(--amber);}
+  .proj-back p{font-size:0.88rem;line-height:1.6;opacity:0.9;margin-bottom:16px;}
+  .proj-back .stack{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+  .proj-back .stack span{
+    font-family:var(--mono);font-size:0.65rem;
+    border:1px solid rgba(242,239,233,0.3);
+    padding:3px 8px;border-radius:20px;
+  }
+  .proj-repo-link{
+    display:inline-block;font-family:var(--mono);font-size:0.75rem;
+    color:var(--paper);text-decoration:underline;text-underline-offset:3px;
+    opacity:0.9;
+  }
+  .proj-repo-link:hover{opacity:1;}
+
+  /* ---- SKILLS ---- */
+  .skill-cloud{display:flex;flex-wrap:wrap;gap:12px;margin-top:44px;}
+  .skill-chip{
+    font-family:var(--mono);font-size:0.85rem;
+    border:1px solid var(--line);padding:10px 18px;
+    border-radius:30px;color:var(--paper-dim);
+    transition:all 0.25s;cursor:default;
+  }
+  .skill-chip:nth-child(5n+1):hover{border-color:var(--pink);color:var(--ink);background:var(--pink);}
+  .skill-chip:nth-child(5n+2):hover{border-color:var(--cyan);color:var(--ink);background:var(--cyan);}
+  .skill-chip:nth-child(5n+3):hover{border-color:var(--lime);color:var(--ink);background:var(--lime);}
+  .skill-chip:nth-child(5n+4):hover{border-color:var(--violet);color:var(--ink);background:var(--violet);}
+  .skill-chip:nth-child(5n+5):hover{border-color:var(--amber);color:var(--ink);background:var(--amber);}
+  .skill-chip:hover{
+    transform:translateY(-2px) scale(1.04);
+  }
+
+  /* ---- CONTACT ---- */
+  #contact{border-bottom:none;padding-bottom:100px;}
+  .contact-title{
+    font-family:var(--serif);font-weight:600;
+    font-size:clamp(2rem,5vw,3.6rem);letter-spacing:-0.02em;
+    max-width:14ch;
+  }
+  .contact-links{margin-top:48px;display:flex;flex-direction:column;gap:0;}
+  .contact-link{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:22px 0;border-top:1px solid var(--line);
+    font-family:var(--mono);font-size:0.95rem;
+    transition:padding-left 0.25s, color 0.25s;
+  }
+  .contact-link:last-child{border-bottom:1px solid var(--line);}
+  .contact-link:hover{padding-left:14px;color:var(--amber);}
+  .contact-link:nth-child(1):hover{color:var(--pink);}
+  .contact-link:nth-child(2):hover{color:var(--cyan);}
+  .contact-link:nth-child(3):hover{color:var(--lime);}
+  .contact-link .arrow{opacity:0;transition:opacity 0.25s;}
+  .contact-link:hover .arrow{opacity:1;}
+  footer{
+    font-family:var(--mono);font-size:0.7rem;color:var(--paper-dim);
+    margin-top:64px;display:flex;justify-content:space-between;
+  }
+
+  @media (max-width:860px){
+    .wrap{grid-template-columns:1fr;}
+    nav.index{
+      position:relative;height:auto;flex-direction:row;
+      align-items:center;padding:24px;border-right:none;border-bottom:1px solid var(--line);
+    }
+    ul.tabs{display:none;}
+    .index-bottom{display:none;}
+    section{padding:64px 24px;}
+    .about-grid,.proj-grid{grid-template-columns:1fr;}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important;transition:none !important;}
+    html{scroll-behavior:auto;}
+  }
+</style>
+</head>
+<body>
+
+<div id="spotlight"></div>
+
+<div class="wrap">
+  <nav class="index">
+    <div class="index-top">
+      <div class="mark" contenteditable="true" data-key="mark">Thanush S R<span>.</span></div>
+      <div class="index-role" contenteditable="true" data-key="role">IT Support → Data Analyst</div>
+      <ul class="tabs">
+        <li><a href="#hero" class="active"><span class="dash"></span>Intro</a></li>
+        <li><a href="#about"><span class="dash"></span>About</a></li>
+        <li><a href="#experience"><span class="dash"></span>Experience</a></li>
+        <li><a href="#projects"><span class="dash"></span>Projects</a></li>
+        <li><a href="#skills"><span class="dash"></span>Stack</a></li>
+        <li><a href="#contact"><span class="dash"></span>Contact</a></li>
+      </ul>
+    </div>
+    <div class="index-bottom">
+      <button id="editToggle" class="edit-btn">
+        <span class="edit-dot"></span><span id="editLabel">Edit content</span>
+      </button>
+      <div class="status"><span class="dot"></span>Open to new roles</div>
+      <a href="mailto:thanushsr912@gmail.com">thanushsr912@gmail.com</a>
+    </div>
+  </nav>
+
+  <main>
+    <section id="hero">
+      <div class="eyebrow">System status: online</div>
+      <h1 class="hero-title" contenteditable="true" data-key="heroTitle">IT support background, <em>compiling</em> into data analysis.</h1>
+      <p class="hero-sub" contenteditable="true" data-key="heroSub">I spent ~2.5 years at TCS across patch administration and Windows support before resigning in July 2026 to move into data analysis. Now building up Excel, SQL, Python and Power BI — with a growing interest in Python development too.</p>
+      <div class="type-line" id="typeLine"></div>
+      <div class="hero-meta">
+        <div><strong contenteditable="true" data-key="meta1n">~2.5 yrs</strong><span contenteditable="true" data-key="meta1l">Patch admin &amp; Windows support, TCS</span></div>
+        <div><strong contenteditable="true" data-key="meta2n">Open</strong><span contenteditable="true" data-key="meta2l">To data analyst roles</span></div>
+        <div><strong contenteditable="true" data-key="meta3n">Bangalore</strong><span contenteditable="true" data-key="meta3l">Karnataka, India</span></div>
+      </div>
+    </section>
+
+    <section id="about">
+      <div class="eyebrow">01 — About</div>
+      <div class="about-grid">
+        <div>
+          <p contenteditable="true" data-key="about1">I joined TCS in January 2024, starting with two months of ILP training in Nagpur before moving into a <strong>Patch Administrator</strong> role for about six months. When the patch team merged with the Windows team, I picked up <strong>Windows support</strong> as well — enterprise-scale, precise, high-stakes work.</p>
+          <p contenteditable="true" data-key="about2">I resigned from TCS in July 2026 to move toward <strong>data analysis</strong>. I'm currently building up <strong>Excel, SQL, Python, and Power BI</strong>, and also have a growing interest in <strong>Python development</strong>. First project — a Job Tracker — is in progress, with more on the way.</p>
+        </div>
+        <ul class="fact-list">
+          <li><span>Target role</span><span contenteditable="true" data-key="fact1">Data Analyst</span></li>
+          <li><span>Previously</span><span contenteditable="true" data-key="fact2">TCS — Patch Admin &amp; Windows Support</span></li>
+          <li><span>Location</span><span contenteditable="true" data-key="fact3">Bangalore, Karnataka</span></li>
+          <li><span>Education</span><span contenteditable="true" data-key="fact4">BE, Electronics &amp; Communication — Tumkur, 2019–2023, CGPA 8.7</span></li>
+          <li><span>Status</span><span contenteditable="true" data-key="fact5">Open to opportunities</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="experience">
+      <div class="eyebrow">02 — Experience</div>
+      <p style="color:var(--paper-dim);max-width:60ch;">A quick run through the roles so far. Drag sideways, or scroll.</p>
+      <div class="timeline-track" id="tlTrack">
+        <div class="tl-item">
+          <div class="tl-date" contenteditable="true" data-key="tl1date">2019 — 2023</div>
+          <div class="tl-role" contenteditable="true" data-key="tl1role">BE, Electronics &amp; Communication</div>
+          <div class="tl-co" contenteditable="true" data-key="tl1co">Tumkur</div>
+          <div class="tl-desc" contenteditable="true" data-key="tl1desc">Graduated with a CGPA of 8.7.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-date" contenteditable="true" data-key="tl2date">Jan 2024</div>
+          <div class="tl-role" contenteditable="true" data-key="tl2role">Joined TCS — ILP Training</div>
+          <div class="tl-co" contenteditable="true" data-key="tl2co">TCS, Nagpur</div>
+          <div class="tl-desc" contenteditable="true" data-key="tl2desc">Completed two months of Initial Learning Program (ILP) training.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-date" contenteditable="true" data-key="tl3date">Mar 2024</div>
+          <div class="tl-role" contenteditable="true" data-key="tl3role">Patch Administrator</div>
+          <div class="tl-co" contenteditable="true" data-key="tl3co">TCS</div>
+          <div class="tl-desc" contenteditable="true" data-key="tl3desc">Managed patch compliance and deployment schedules for about six months.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-date" contenteditable="true" data-key="tl4date">Sep 2024</div>
+          <div class="tl-role" contenteditable="true" data-key="tl4role">Patch &amp; Windows Support</div>
+          <div class="tl-co" contenteditable="true" data-key="tl4co">TCS</div>
+          <div class="tl-desc" contenteditable="true" data-key="tl4desc">Patch team merged with the Windows team — took on Windows support alongside patching.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-date" contenteditable="true" data-key="tl5date">Jul 2026</div>
+          <div class="tl-role" contenteditable="true" data-key="tl5role">Resigned from TCS</div>
+          <div class="tl-co" contenteditable="true" data-key="tl5co">TCS</div>
+          <div class="tl-desc" contenteditable="true" data-key="tl5desc">Left to pursue a move into data analysis.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-date" contenteditable="true" data-key="tl6date">2026 — Now</div>
+          <div class="tl-role" contenteditable="true" data-key="tl6role">Upskilling in Data Analysis</div>
+          <div class="tl-co" contenteditable="true" data-key="tl6co">Self-directed</div>
+          <div class="tl-desc" contenteditable="true" data-key="tl6desc">Learning Excel, SQL, Python, and Power BI — also exploring Python development. Building a Job Tracker project.</div>
+        </div>
+      </div>
+      <div class="drag-hint">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 12h8M8 12l3-3M8 12l3 3M16 12l-3-3M16 12l-3 3"/></svg>
+        drag to scroll
+      </div>
+    </section>
+
+    <section id="projects">
+      <div class="eyebrow">03 — Projects</div>
+      <p style="color:var(--paper-dim);max-width:60ch;">Click a card to open the file.</p>
+      <div class="proj-grid">
+        <div class="proj-card">
+          <div class="proj-inner">
+            <div class="proj-face proj-front">
+              <div><div class="proj-tag" contenteditable="true" data-key="p1tag">In progress</div><div class="proj-title" contenteditable="true" data-key="p1title">Job Tracker</div></div>
+              <button class="proj-flip-btn" data-flip>Open file →</button>
+            </div>
+            <div class="proj-face proj-back">
+              <div>
+                <div class="proj-tag" style="color:var(--paper);">The brief</div>
+                <p contenteditable="true" data-key="p1desc">Tracks every job application I've submitted — company, role, status, and key deadlines in one place, with reminders so nothing slips through.</p>
+                <div class="stack"><span>Job Tracking</span><span>Personal Tool</span></div>
+                <a href="https://github.com/thanush912/job-tracker" target="_blank" rel="noopener" class="proj-repo-link">View repo ↗</a>
+              </div>
+              <button class="proj-flip-btn" data-flip>← Close</button>
+            </div>
+          </div>
+        </div>
+        <div class="proj-card">
+          <div class="proj-inner">
+            <div class="proj-face proj-front">
+              <div><div class="proj-tag" contenteditable="true" data-key="p2tag">Coming soon</div><div class="proj-title" contenteditable="true" data-key="p2title">Next project</div></div>
+              <button class="proj-flip-btn" data-flip>Open file →</button>
+            </div>
+            <div class="proj-face proj-back">
+              <div>
+                <div class="proj-tag" style="color:var(--paper);">The brief</div>
+                <p contenteditable="true" data-key="p2desc">Next project idea TBD — check back soon.</p>
+                <div class="stack"><span>LangChain</span><span>HuggingFace</span><span>Transformers</span></div>
+              </div>
+              <button class="proj-flip-btn" data-flip>← Close</button>
+            </div>
+          </div>
+        </div>
+        <div class="proj-card">
+          <div class="proj-inner">
+            <div class="proj-face proj-front">
+              <div><div class="proj-tag" contenteditable="true" data-key="p3tag">Coming soon</div><div class="proj-title" contenteditable="true" data-key="p3title">Next project</div></div>
+              <button class="proj-flip-btn" data-flip>Open file →</button>
+            </div>
+            <div class="proj-face proj-back">
+              <div>
+                <div class="proj-tag" style="color:var(--paper);">The brief</div>
+                <p contenteditable="true" data-key="p3desc">Next project idea TBD — check back soon.</p>
+                <div class="stack"><span>Pinecone</span><span>Vector DB</span></div>
+              </div>
+              <button class="proj-flip-btn" data-flip>← Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="skills">
+      <div class="eyebrow">04 — Stack</div>
+      <div class="skill-cloud">
+        <span class="skill-chip" contenteditable="true">Excel</span>
+        <span class="skill-chip" contenteditable="true">SQL</span>
+        <span class="skill-chip" contenteditable="true">Python</span>
+        <span class="skill-chip" contenteditable="true">Power BI</span>
+        <span class="skill-chip" contenteditable="true">Python Development</span>
+        <span class="skill-chip" contenteditable="true">Windows Administration</span>
+        <span class="skill-chip" contenteditable="true">Patch Management</span>
+        <span class="skill-chip" contenteditable="true">SCCM / MECM</span>
+        <span class="skill-chip" contenteditable="true">ServiceNow</span>
+        <span class="skill-chip" contenteditable="true">PowerShell</span>
+      </div>
+    </section>
+
+    <section id="contact">
+      <div class="eyebrow">05 — Contact</div>
+      <div class="contact-title" contenteditable="true" data-key="contactTitle">GET /contact → let's talk.</div>
+      <div class="contact-links">
+        <a class="contact-link" href="mailto:thanushsr912@gmail.com"><span>Email</span><span><span contenteditable="true" data-key="contactEmail">thanushsr912@gmail.com</span> <span class="arrow">↗</span></span></a>
+        <a class="contact-link" href="https://www.linkedin.com/in/thanush-s-r-930a26190/" target="_blank" rel="noopener"><span>LinkedIn</span><span><span contenteditable="true" data-key="contactLinkedin">linkedin.com/in/thanush-s-r-930a26190</span> <span class="arrow">↗</span></span></a>
+        <a class="contact-link" href="https://github.com/thanush912" target="_blank" rel="noopener"><span>GitHub</span><span><span contenteditable="true" data-key="contactResume">github.com/thanush912</span> <span class="arrow">↗</span></span></a>
+      </div>
+      <footer>
+        <span contenteditable="true" data-key="footerLeft">© 2026 Thanush S R</span>
+        <span contenteditable="true" data-key="footerRight">Last deployed August 2026</span>
+      </footer>
+    </section>
+  </main>
+</div>
+
+<script>
+  // spotlight cursor
+  const spot = document.getElementById('spotlight');
+  window.addEventListener('mousemove', (e)=>{
+    spot.style.setProperty('--x', e.clientX + 'px');
+    spot.style.setProperty('--y', e.clientY + 'px');
+  });
+
+  // typewriter line
+  const lines = [
+    "currently swapping ticket queues for query editors.",
+    "previously: patch windows and Windows patches at TCS.",
+    "best reached by email, or a well-formed SQL join."
+  ];
+  const typeEl = document.getElementById('typeLine');
+  let li = 0, ci = 0, deleting = false;
+  function type(){
+    const full = lines[li];
+    if(!deleting){
+      ci++;
+      typeEl.innerHTML = full.slice(0,ci) + '<span class="cursor">&nbsp;</span>';
+      if(ci === full.length){ deleting = true; setTimeout(type, 1800); return; }
+    } else {
+      ci--;
+      typeEl.innerHTML = full.slice(0,ci) + '<span class="cursor">&nbsp;</span>';
+      if(ci === 0){ deleting = false; li = (li+1)%lines.length; }
+    }
+    setTimeout(type, deleting ? 25 : 45);
+  }
+  type();
+
+  // scrollspy
+  const tabs = document.querySelectorAll('ul.tabs a');
+  const sections = document.querySelectorAll('main section');
+  const spy = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){
+        tabs.forEach(t=>t.classList.remove('active'));
+        const match = document.querySelector('ul.tabs a[href="#'+entry.target.id+'"]');
+        if(match) match.classList.add('active');
+      }
+    });
+  }, {rootMargin:'-40% 0px -55% 0px'});
+  sections.forEach(s=>spy.observe(s));
+
+  // draggable timeline
+  const track = document.getElementById('tlTrack');
+  let isDown=false, startX, scrollLeft;
+  track.addEventListener('mousedown', (e)=>{
+    isDown=true; track.classList.add('dragging');
+    startX = e.pageX - track.offsetLeft;
+    scrollLeft = track.scrollLeft;
+  });
+  ['mouseleave','mouseup'].forEach(evt=>track.addEventListener(evt, ()=>{
+    isDown=false; track.classList.remove('dragging');
+  }));
+  track.addEventListener('mousemove', (e)=>{
+    if(!isDown) return;
+    e.preventDefault();
+    const x = e.pageX - track.offsetLeft;
+    track.scrollLeft = scrollLeft - (x - startX) * 1.4;
+  });
+
+  // flip cards
+  document.querySelectorAll('[data-flip]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      btn.closest('.proj-card').classList.toggle('flipped');
+    });
+  });
+
+  // ---- EDITABLE CONTENT: load, edit-mode, autosave ----
+  const STORAGE_KEY = 'portfolio-content-v1';
+  const editables = Array.from(document.querySelectorAll('[contenteditable="true"]'));
+
+  // assign a stable key to every editable (data-key if present, else index-based)
+  editables.forEach((el, i) => {
+    if(!el.dataset.key) el.dataset.key = 'auto-' + i;
+  });
+
+  function loadSaved(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return;
+      const data = JSON.parse(raw);
+      editables.forEach(el=>{
+        const key = el.dataset.key;
+        if(data[key] !== undefined) el.innerHTML = data[key];
+      });
+    }catch(e){ console.warn('Could not load saved content', e); }
+  }
+
+  let saveTimer;
+  const toast = document.createElement('div');
+  toast.className = 'save-toast';
+  toast.textContent = 'Saved';
+  document.body.appendChild(toast);
+
+  function showToast(){
+    toast.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(()=> toast.classList.remove('show'), 1400);
+  }
+
+  function saveAll(){
+    const data = {};
+    editables.forEach(el=>{ data[el.dataset.key] = el.innerHTML; });
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      showToast();
+    }catch(e){ console.warn('Could not save content', e); }
+  }
+
+  function scheduleSave(){
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(saveAll, 600);
+  }
+
+  editables.forEach(el=>{
+    el.addEventListener('input', scheduleSave);
+    el.addEventListener('blur', saveAll);
+    // keep single-line fields tidy: Enter blurs instead of adding a line break
+    if(el.tagName !== 'P'){
+      el.addEventListener('keydown', (e)=>{
+        if(e.key === 'Enter'){ e.preventDefault(); el.blur(); }
+      });
+    }
+  });
+
+  loadSaved();
+
+  // edit mode toggle
+  const editToggle = document.getElementById('editToggle');
+  const editLabel = document.getElementById('editLabel');
+  function setEditMode(on){
+    document.body.classList.toggle('edit-mode', on);
+    editLabel.textContent = on ? 'Editing — click text to change' : 'Edit content';
+  }
+  editToggle.addEventListener('click', ()=>{
+    setEditMode(!document.body.classList.contains('edit-mode'));
+  });
+
+  // stop contact links from navigating away while editing
+  document.querySelectorAll('.contact-link').forEach(link=>{
+    link.addEventListener('click', (e)=>{
+      if(document.body.classList.contains('edit-mode')) e.preventDefault();
+    });
+  });
+
+  // reset button (long-press-free: simple confirm)
+  const resetBtn = document.createElement('button');
+  resetBtn.textContent = 'Reset to defaults';
+  resetBtn.className = 'edit-btn';
+  resetBtn.style.marginTop = '8px';
+  resetBtn.style.display = 'none';
+  editToggle.insertAdjacentElement('afterend', resetBtn);
+  editToggle.addEventListener('click', ()=>{
+    resetBtn.style.display = document.body.classList.contains('edit-mode') ? 'flex' : 'none';
+  });
+  resetBtn.addEventListener('click', ()=>{
+    if(confirm('Clear your saved edits and restore the original placeholder text?')){
+      localStorage.removeItem(STORAGE_KEY);
+      location.reload();
+    }
+  });
+</script>
+
+</body>
+</html>
