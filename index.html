@@ -276,7 +276,7 @@
     display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:44px;
   }
   .proj-card{
-    perspective:1600px;height:280px;
+    perspective:1600px;height:320px;
   }
   .proj-inner{
     position:relative;width:100%;height:100%;
@@ -286,34 +286,25 @@
   .proj-card.flipped .proj-inner{transform:rotateY(180deg);}
   .proj-face{
     position:absolute;inset:0;backface-visibility:hidden;
-    border:1px solid var(--line);padding:32px;
+    border:1px solid var(--line);padding:28px;
     display:flex;flex-direction:column;justify-content:space-between;
+    overflow-y:auto;
   }
-  .proj-front{background:var(--ink-2);border-top:3px solid var(--amber);}
-  .proj-card:nth-child(1) .proj-front{border-top-color:var(--pink);}
-  .proj-card:nth-child(2) .proj-front{border-top-color:var(--cyan);}
-  .proj-card:nth-child(3) .proj-front{border-top-color:var(--lime);}
-  .proj-card:nth-child(4) .proj-front{border-top-color:var(--violet);}
+  .proj-front{background:var(--ink-2);border-top:3px solid var(--proj-a1, var(--amber));}
   .proj-back{
-    background:linear-gradient(135deg, var(--violet), var(--pink));
+    background:linear-gradient(135deg, var(--proj-a1, var(--violet)), var(--proj-a2, var(--pink)));
     color:var(--paper);
     transform:rotateY(180deg);
   }
-  .proj-card:nth-child(1) .proj-back{background:linear-gradient(135deg, var(--pink), var(--amber));}
-  .proj-card:nth-child(2) .proj-back{background:linear-gradient(135deg, var(--cyan), var(--violet));}
-  .proj-card:nth-child(3) .proj-back{background:linear-gradient(135deg, var(--lime), var(--teal));}
-  .proj-card:nth-child(4) .proj-back{background:linear-gradient(135deg, var(--violet), var(--pink));}
   .proj-tag{font-family:var(--mono);font-size:0.68rem;color:var(--amber);text-transform:uppercase;letter-spacing:0.08em;}
-  .proj-card:nth-child(1) .proj-front .proj-tag{color:var(--pink);}
-  .proj-card:nth-child(2) .proj-front .proj-tag{color:var(--cyan);}
-  .proj-card:nth-child(3) .proj-front .proj-tag{color:var(--lime);}
-  .proj-card:nth-child(4) .proj-front .proj-tag{color:var(--violet);}
+  .proj-front .proj-tag{color:var(--proj-a1, var(--amber));}
   .proj-title{font-family:var(--serif);font-size:1.6rem;font-weight:600;margin-top:12px;}
   .proj-flip-btn{
     align-self:flex-start;font-family:var(--mono);font-size:0.72rem;
     border:1px solid var(--line);padding:8px 14px;
     display:flex;align-items:center;gap:8px;
     transition:all 0.2s;
+    background:transparent;color:inherit;cursor:pointer;
   }
   .proj-card:hover .proj-flip-btn{border-color:var(--amber);color:var(--amber);}
   .proj-back p{font-size:0.88rem;line-height:1.6;opacity:0.9;margin-bottom:16px;}
@@ -329,6 +320,25 @@
     opacity:0.9;
   }
   .proj-repo-link:hover{opacity:1;}
+  .proj-actions{display:flex;gap:10px;margin-top:auto;padding-top:14px;}
+  .proj-actions button{
+    font-family:var(--mono);font-size:0.65rem;text-transform:uppercase;
+    letter-spacing:0.05em;background:rgba(0,0,0,0.15);border:1px solid rgba(242,239,233,0.35);
+    color:var(--paper);padding:6px 12px;border-radius:20px;cursor:pointer;
+    transition:all 0.2s;
+  }
+  .proj-actions button:hover{background:rgba(0,0,0,0.3);}
+  .proj-edit-fields{display:none;}
+  .proj-card.editing .proj-edit-fields{display:block;}
+  .proj-card.editing .proj-back-view{display:none;}
+  .proj-edit-fields input, .proj-edit-fields textarea{
+    width:100%;background:rgba(0,0,0,0.25);border:1px solid rgba(242,239,233,0.35);
+    color:var(--paper);font-family:var(--sans);font-size:0.82rem;
+    padding:8px 10px;border-radius:6px;margin-bottom:8px;
+  }
+  .proj-edit-fields textarea{min-height:64px;resize:vertical;}
+  .proj-edit-fields input::placeholder, .proj-edit-fields textarea::placeholder{color:rgba(242,239,233,0.5);}
+  .proj-edit-fields input:focus, .proj-edit-fields textarea:focus{outline:none;border-color:var(--paper);}
 
   /* ---- SKILLS ---- */
   .skill-cloud{display:flex;flex-wrap:wrap;gap:12px;margin-top:44px;}
@@ -566,59 +576,11 @@
 
     <section id="projects">
       <div class="eyebrow">03 — Projects</div>
-      <p style="color:var(--paper-dim);max-width:60ch;">Click a card to open the file.</p>
-      <div class="proj-grid">
-        <div class="proj-card">
-          <div class="proj-inner">
-            <div class="proj-face proj-front">
-              <div><div class="proj-tag" contenteditable="true" data-key="p1tag">In progress</div><div class="proj-title" contenteditable="true" data-key="p1title">Job Tracker</div></div>
-              <button class="proj-flip-btn" data-flip>Open file →</button>
-            </div>
-            <div class="proj-face proj-back">
-              <div>
-                <div class="proj-tag" style="color:var(--paper);">The brief</div>
-                <p contenteditable="true" data-key="p1desc">Tracks every job application I've submitted — company, role, status, and key deadlines in one place, with reminders so nothing slips through.</p>
-                <div class="stack"><span>Job Tracking</span><span>Personal Tool</span></div>
-                <a href="https://github.com/thanush912/job-tracker" target="_blank" rel="noopener" class="proj-repo-link">View repo ↗</a>
-                <a href="https://thanush912.github.io/job-tracker/" target="_blank" rel="noopener" class="proj-repo-link">View page ↗</a>
-              </div>
-              <button class="proj-flip-btn" data-flip>← Close</button>
-            </div>
-          </div>
-        </div>
-        <div class="proj-card">
-          <div class="proj-inner">
-            <div class="proj-face proj-front">
-              <div><div class="proj-tag" contenteditable="true" data-key="p2tag">Coming soon</div><div class="proj-title" contenteditable="true" data-key="p2title">Next project</div></div>
-              <button class="proj-flip-btn" data-flip>Open file →</button>
-            </div>
-            <div class="proj-face proj-back">
-              <div>
-                <div class="proj-tag" style="color:var(--paper);">The brief</div>
-                <p contenteditable="true" data-key="p2desc">Next project idea TBD — check back soon.</p>
-                <div class="stack"><span>LangChain</span><span>HuggingFace</span><span>Transformers</span></div>
-              </div>
-              <button class="proj-flip-btn" data-flip>← Close</button>
-            </div>
-          </div>
-        </div>
-        <div class="proj-card">
-          <div class="proj-inner">
-            <div class="proj-face proj-front">
-              <div><div class="proj-tag" contenteditable="true" data-key="p3tag">Coming soon</div><div class="proj-title" contenteditable="true" data-key="p3title">Next project</div></div>
-              <button class="proj-flip-btn" data-flip>Open file →</button>
-            </div>
-            <div class="proj-face proj-back">
-              <div>
-                <div class="proj-tag" style="color:var(--paper);">The brief</div>
-                <p contenteditable="true" data-key="p3desc">Next project idea TBD — check back soon.</p>
-                <div class="stack"><span>Pinecone</span><span>Vector DB</span></div>
-              </div>
-              <button class="proj-flip-btn" data-flip>← Close</button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <p style="color:var(--paper-dim);max-width:60ch;margin-bottom:32px;">Click a card to open the file.</p>
+      <div class="proj-grid" id="projectGrid"></div>
+      <button class="blog-add-btn" id="projectAddBtn" style="margin-top:20px;">
+        <span class="blog-add-icon">+</span> New project
+      </button>
     </section>
 
     <section id="skills">
@@ -673,7 +635,7 @@
   // typewriter line
   const lines = [
     "currently swapping ticket queues for query editors.",
-    "previously: patch windows and windows patches at TCS.",
+    "previously: patch windows and Windows patches at TCS.",
     "best reached by email, or a well-formed SQL join."
   ];
   const typeEl = document.getElementById('typeLine');
@@ -725,12 +687,145 @@
     track.scrollLeft = scrollLeft - (x - startX) * 1.4;
   });
 
-  // flip cards
-  document.querySelectorAll('[data-flip]').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      btn.closest('.proj-card').classList.toggle('flipped');
+  // ---- PROJECTS: add / edit / flip / delete, persisted separately ----
+  const PROJECTS_KEY = 'portfolio-projects-v1';
+  const projAccents = [
+    ['var(--pink)', 'var(--amber)'],
+    ['var(--cyan)', 'var(--violet)'],
+    ['var(--lime)', 'var(--teal)'],
+    ['var(--violet)', 'var(--pink)'],
+    ['var(--amber)', 'var(--cyan)']
+  ];
+  const defaultProjects = [
+    {
+      id: 1, tag: 'In progress', title: 'Job Tracker',
+      desc: "Tracks every job application I've submitted — company, role, status, and key deadlines in one place, with reminders so nothing slips through.",
+      stack: ['Job Tracking', 'Personal Tool'],
+      link: 'https://github.com/thanush912/job-tracker',
+      flipped: false, editing: false
+    },
+    {
+      id: 2, tag: 'Coming soon', title: 'Next project',
+      desc: 'Next project idea TBD — check back soon.',
+      stack: [], link: '', flipped: false, editing: false
+    },
+    {
+      id: 3, tag: 'Coming soon', title: 'Next project',
+      desc: 'Next project idea TBD — check back soon.',
+      stack: [], link: '', flipped: false, editing: false
+    }
+  ];
+  let projects = [];
+
+  function loadProjects(){
+    try{
+      const raw = localStorage.getItem(PROJECTS_KEY);
+      projects = raw ? JSON.parse(raw) : JSON.parse(JSON.stringify(defaultProjects));
+    }catch(e){ projects = JSON.parse(JSON.stringify(defaultProjects)); }
+  }
+  function saveProjects(){
+    try{ localStorage.setItem(PROJECTS_KEY, JSON.stringify(projects)); showToast(); }
+    catch(e){ console.warn('Could not save projects', e); }
+  }
+
+  function renderProjects(){
+    const grid = document.getElementById('projectGrid');
+    if(projects.length === 0){
+      grid.innerHTML = '<div class="blog-empty">No projects yet — click "New project" to add one.</div>';
+      return;
+    }
+    grid.innerHTML = projects.map((p, i) => {
+      const [a1, a2] = projAccents[i % projAccents.length];
+      const stackHtml = (p.stack||[]).map(s=>`<span>${escapeHtml(s)}</span>`).join('');
+      const linkHtml = p.link ? `<a href="${escapeHtml(p.link)}" target="_blank" rel="noopener" class="proj-repo-link">View repo ↗</a>` : '';
+      return `
+      <div class="proj-card ${p.flipped ? 'flipped' : ''} ${p.editing ? 'editing' : ''}" style="--proj-a1:${a1};--proj-a2:${a2};" data-id="${p.id}">
+        <div class="proj-inner">
+          <div class="proj-face proj-front">
+            <div><div class="proj-tag">${escapeHtml(p.tag) || 'Project'}</div><div class="proj-title">${escapeHtml(p.title) || 'Untitled'}</div></div>
+            <button class="proj-flip-btn" data-pflip="${p.id}">Open file →</button>
+          </div>
+          <div class="proj-face proj-back">
+            <div class="proj-back-view">
+              <div class="proj-tag" style="color:var(--paper);">The brief</div>
+              <p>${escapeHtml(p.desc) || 'No description yet.'}</p>
+              ${stackHtml ? `<div class="stack">${stackHtml}</div>` : ''}
+              ${linkHtml}
+            </div>
+            <div class="proj-edit-fields">
+              <input type="text" data-p-tag="${p.id}" placeholder="Tag (e.g. In progress)" value="${escapeHtml(p.tag)}">
+              <input type="text" data-p-title="${p.id}" placeholder="Project title" value="${escapeHtml(p.title)}">
+              <textarea data-p-desc="${p.id}" placeholder="What does it do?">${escapeHtml(p.desc)}</textarea>
+              <input type="text" data-p-stack="${p.id}" placeholder="Stack, comma separated" value="${escapeHtml((p.stack||[]).join(', '))}">
+              <input type="text" data-p-link="${p.id}" placeholder="Repo / demo link (optional)" value="${escapeHtml(p.link)}">
+            </div>
+            <div class="proj-actions">
+              <button data-p-edit-toggle="${p.id}">${p.editing ? 'Save' : 'Edit'}</button>
+              <button data-p-delete="${p.id}">Delete</button>
+              <button data-pflip="${p.id}" style="margin-left:auto;">← Close</button>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+
+    grid.querySelectorAll('[data-pflip]').forEach(btn=>{
+      btn.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        const id = btn.dataset.pflip;
+        const p = projects.find(x=>String(x.id)===id);
+        p.flipped = !p.flipped;
+        renderProjects();
+      });
     });
+    grid.querySelectorAll('[data-p-edit-toggle]').forEach(btn=>{
+      btn.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        const id = btn.dataset.pEditToggle;
+        const p = projects.find(x=>String(x.id)===id);
+        if(p.editing){
+          p.tag = grid.querySelector(`[data-p-tag="${id}"]`).value.trim();
+          p.title = grid.querySelector(`[data-p-title="${id}"]`).value.trim();
+          p.desc = grid.querySelector(`[data-p-desc="${id}"]`).value.trim();
+          p.stack = grid.querySelector(`[data-p-stack="${id}"]`).value
+            .split(',').map(s=>s.trim()).filter(Boolean);
+          p.link = grid.querySelector(`[data-p-link="${id}"]`).value.trim();
+          p.editing = false;
+          saveProjects();
+        } else {
+          p.editing = true;
+          p.flipped = true;
+        }
+        renderProjects();
+      });
+    });
+    grid.querySelectorAll('[data-p-delete]').forEach(btn=>{
+      btn.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        const id = btn.dataset.pDelete;
+        if(confirm('Delete this project?')){
+          projects = projects.filter(x=>String(x.id)!==id);
+          saveProjects();
+          renderProjects();
+        }
+      });
+    });
+  }
+
+  document.getElementById('projectAddBtn').addEventListener('click', ()=>{
+    const p = {
+      id: Date.now(), tag: 'New', title: '', desc: '',
+      stack: [], link: '', flipped: true, editing: true
+    };
+    projects.push(p);
+    renderProjects();
+    saveProjects();
+    const el = document.querySelector(`[data-p-title="${p.id}"]`);
+    if(el) el.focus();
   });
+
+  loadProjects();
+  renderProjects();
 
   // ---- EDITABLE CONTENT: load, edit-mode, autosave ----
   const STORAGE_KEY = 'portfolio-content-v1';
